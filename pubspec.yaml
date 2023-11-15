@@ -38,6 +38,7 @@ dependencies:
   downloads_path_provider_28: ^0.1.2
   http: ^1.1.0
   just_audio: ^0.9.36
+  device_preview: ^1.1.0
   path_provider: ^2.1.1
 
 dev_dependencies:
