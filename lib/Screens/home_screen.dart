@@ -1,17 +1,19 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:future_progress_dialog/future_progress_dialog.dart';
 import 'dart:typed_data';
 import 'package:just_audio/just_audio.dart';
 import 'package:tts/Data/data.dart';
+import 'package:tts/Screens/player_screen.dart';
+import 'package:tts/constant/color.dart';
 import 'package:tts/services/api_services.dart';
-import 'package:tts/utility%20functions/audio_player.dart';
 import 'package:tts/utility%20functions/selection_functions.dart';
-import '../utility functions/file_download.dart';
 
 
 
 class TextToSpeechApp extends StatefulWidget {
-  const TextToSpeechApp({super.key});
+  final String text;
+  const TextToSpeechApp({super.key, required this.text});
 
   @override
   // ignore: library_private_types_in_public_api
@@ -19,40 +21,65 @@ class TextToSpeechApp extends StatefulWidget {
 }
 
 class _TextToSpeechAppState extends State<TextToSpeechApp> {
-  final TextEditingController textController = TextEditingController();
   Uint8List? audioData;
   final player = AudioPlayer();
-  bool isAudioAvailable = false;
+  String selectedformat = '8khz_8bit_mono';
   String selectedLanguageCode = 'en-us';
   String selectedvoicecode = 'Linda';
+  String selectedcodec = 'mp3';
   
-  Future<void> convertTextToSpeech(String text) async {
+  Future<void> convertTextToSpeech() async {
+    try {
+      showDialog(
+      context: context,
+      builder: (context) => FutureProgressDialog(
     TextToSpeechService.convertTextToSpeech(
-      text: text,
+
+      text: widget.text,
+      selectedcodec: selectedcodec,
+      selectedformat: selectedformat,
+      
       selectedLanguageCode: selectedLanguageCode,
       selectedVoiceCode: selectedvoicecode,
       player: player,
       onAudioAvailable: (audioData) {
-        setState(() {
-          this.audioData = audioData;
-          isAudioAvailable = true;
-          print('Text to speech done.');
-        });
+      
+              setState(() {
+                this.audioData = audioData;
+              });
+
+              
       },
       onError: (error) {
-        print(error);
+        
       },
+    ), 
+    message: Text('Converting text to speech...', style: TextStyle(fontFamily: 'Medium', fontSize: 15, color: white)),
+    progress: CircularProgressIndicator(color: primary),
+    decoration: BoxDecoration(
+      color: black_900,
+      borderRadius: BorderRadius.circular(20)
+    ),
+    ),
+      ).then((_) {
+      // Navigate to Player screen after conversion
+      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => Player(audioData: audioData!)), (route) => false);
+    });
+      
+    }catch (e) {
+      print('Unexpected error: $e');
+  }
+  }
+   Future<void> showProgress(BuildContext context) async {
+    var result = await showDialog(
+      context: context,
+      builder: (context) => FutureProgressDialog(
+        convertTextToSpeech(),
+        message: Text('Converting text to speech...'),
+      ),
     );
-  }
 
-  void audioplayer() async {
-    if (audioData != null) {
-      PlayAudio(audioData!);
-    }
-  }
-
- void downloadAudio() async {
-    await FileOperations.downloadAudio(audioData!, context);
+    // Handle the result if needed
   }
  void _showLanguageBottomSheet() {
     showLanguageBottomSheet(context, (String selectedLanguage) {
@@ -70,71 +97,228 @@ class _TextToSpeechAppState extends State<TextToSpeechApp> {
       });
     });
   }
+  void _showFormatBottomSheet() {
+    showFormatBottomSheet(context, (String selectedFormat) {
+      setState(() {
+        selectedformat = selectedFormat;
+      });
+    });
+  } 
 
   @override
   Widget build(BuildContext context) {
+        String displayedText = widget.text.length > 10
+        ? widget.text.substring(0, 10) + '...'
+        : widget.text;
     return Scaffold(
+      backgroundColor: black,
       appBar: AppBar(
-        title: const Text('Text to Speech App'),
+        backgroundColor: black,
+        elevation: 0.0,
+        leading: IconButton(
+          onPressed: (){Navigator.pop(context);},
+           icon: Icon(Icons.arrow_back_ios_rounded, color: white,)
+           ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-           TextButton(
-  onPressed: _showLanguageBottomSheet,
-  child: Text('Select Language: ${supportedLanguages.firstWhere((lang) => lang['code'] == selectedLanguageCode)['name']}'),
-),
-
-TextButton(
-  onPressed: _showVoiceBottomSheet,
-  child: Text('Select Voice: ${supportedvoice.firstWhere((voice) => voice['code'] == selectedvoicecode)['name']}'),
-),
-            const SizedBox(height: 16.0),
-            TextField(
-              controller: textController,
-              decoration: const InputDecoration(labelText: 'Enter Text'),
+            Padding(
+              padding: const EdgeInsets.only(left: 5, bottom: 5),
+              child: Text('Your Text', style: TextStyle(fontFamily: 'Regular', fontSize: 15, color: white),),
             ),
-            const SizedBox(height: 16.0),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                ElevatedButton(
-                  onPressed: () async {
-                    // Show a loading indicator while converting text to speech
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  },
-                );
-                await convertTextToSpeech(textController.text);
-                // ignore: use_build_context_synchronously
-                Navigator.of(context).pop();
-                  },
-                  child: const Text('Convert to Speech'),
+            InkWell(
+              splashColor: black,
+                highlightColor: black,
+              onTap: (){
+                Navigator.pop(context);
+              },
+              child: Container(
+                height: 80,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: black_900,
+                  borderRadius: BorderRadius.circular(10),
                 ),
-              
-                Padding(
-                  padding: const EdgeInsets.only(top: 10),
-                  child: ElevatedButton(
-                    onPressed: downloadAudio,
-                    child: const Text('Download Audio'),
-                  ),
-                ),
-                isAudioAvailable ? Padding(
-                  padding: const EdgeInsets.only(top: 10),
-                  child: ElevatedButton(
-                    onPressed: audioplayer, 
-                    child: const Text('Play Audio'),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 10),
+                      child: Text(
+                      displayedText,
+                      style: TextStyle(fontFamily: 'Medium', fontSize: 16, color: white),
+                      ),
                     ),
-                ) : const SizedBox(),
-
-              ],
+                    Padding(
+                      padding: const EdgeInsets.only(right: 10),
+                      child: Icon(Icons.edit, color: primary,),
+                    )
+                  ],
+                ),
+              ),
             ),
+            Padding(
+              padding: const EdgeInsets.only(left: 5, bottom: 5, top: 15),
+              child: Text('Select Your Language', style: TextStyle(fontFamily: 'Regular', fontSize: 15, color: white),),
+            ),
+            InkWell(
+              splashColor: black,
+                highlightColor: black,
+              onTap: (){
+                _showLanguageBottomSheet();
+              },
+              child: Container(
+                height: 50,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: black_900,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 10),
+                      child: Text(
+                      '${supportedLanguages.firstWhere((lang) => lang['code'] == selectedLanguageCode)['name']}',
+                      style: TextStyle(fontFamily: 'Medium', fontSize: 16, color: white),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 10),
+                      child: Icon(Icons.arrow_forward_ios_rounded, color: primary,),
+                    )
+                  ],
+                ),
+              ),
+            ),
+              Padding(
+              padding: const EdgeInsets.only(left: 5, top: 15),
+              child: Text('Select Your Voice', style: TextStyle(fontFamily: 'Regular', fontSize: 15, color: white),),
+            ),
+              InkWell(
+                splashColor: black,
+                highlightColor: black,
+                onTap: _showVoiceBottomSheet,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 5),
+                  child: Container(
+                  height: 50,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: black_900,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 10),
+                        child: Text(
+                        '${supportedvoice.firstWhere((voice) => voice['code'] == selectedvoicecode)['name']}',
+                        style: TextStyle(fontFamily: 'Medium', fontSize: 16, color: white),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 10),
+                        child: Icon(Icons.arrow_forward_ios_rounded, color: primary,),
+                      )
+                    ],
+                  ),
+                            ),
+                ),
+              ),
+                            Padding(
+              padding: const EdgeInsets.only(left: 5, top: 15),
+              child: Text('Select Audio Format', style: TextStyle(fontFamily: 'Regular', fontSize: 15, color: white),),
+            ),
+              InkWell(
+                splashColor: black,
+                highlightColor: black,
+                onTap: _showFormatBottomSheet,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 5),
+                  child: Container(
+                  height: 50,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: black_900,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 10),
+                        child: Text(
+                        '${supportedformat.firstWhere((format) => format['code'] == selectedformat)['name']}',
+                        style: TextStyle(fontFamily: 'Medium', fontSize: 16, color: white),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 10),
+                        child: Icon(Icons.arrow_forward_ios_rounded, color: primary,),
+                      )
+                    ],
+                  ),
+                            ),
+                ),
+              ),
+              
+              Padding(
+                padding: const EdgeInsets.only(left: 10, right: 10, top: 12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Select Audio Codec:', style: TextStyle(fontFamily: 'Regular', fontSize: 16, color: white)),
+                    DropdownButton<String>(
+                      style: TextStyle(color: white),
+                value: selectedcodec,
+                dropdownColor: black_900,
+                onChanged: (String? newValue) {
+                  setState(() {
+                    selectedcodec = newValue!;
+                  });
+                },
+                items: supportedcodec.map<DropdownMenuItem<String>>((Map<String, String> codec) {
+                  return DropdownMenuItem<String>(
+                    value: codec['code'],
+                    child: Text(codec['name']!),
+                  );
+                }).toList(),
+                          ),
+                  ],
+              
+                ),
+              ),
+              Padding(
+               padding: const EdgeInsets.only(left: 70, right: 70, top: 30),
+               child: InkWell(
+                splashColor: black,
+                highlightColor: black,
+                onTap: (){
+                 
+            
+            convertTextToSpeech();
+    
+                },
+                 child: Container(
+                        height: 51,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: primary,
+                          borderRadius: BorderRadius.circular(27),
+                          
+                        ),
+                        child:  Center(child: Text('Convert', style: TextStyle(fontFamily: 'SemiBold', fontSize: 18, color: black),)),
+                       ),
+               ),
+             ),
+
           ],
         ),
       ),

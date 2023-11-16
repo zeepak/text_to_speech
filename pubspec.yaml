@@ -39,6 +39,8 @@ dependencies:
   http: ^1.1.0
   just_audio: ^0.9.36
   country_flags: ^2.1.0
+  fluttertoast: ^8.2.4
+  future_progress_dialog: ^0.2.1
   device_preview: ^1.1.0
   path_provider: ^2.1.1
 
@@ -80,10 +82,22 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
+  fonts:
+    - family: Bold
+      fonts:
+        - asset: fonts/Poppins-Bold.ttf
+    - family: Light
+      fonts:
+        - asset: fonts/Poppins-Light.ttf
+    - family: Medium
+      fonts:
+        - asset: fonts/Poppins-Medium.ttf
+    - family: Regular
+      fonts:
+        - asset: fonts/Poppins-Regular.ttf
+    - family: SemiBold
+      fonts:
+        - asset: fonts/Poppins-SemiBold.ttf                
   #       - asset: fonts/Schyler-Italic.ttf
   #         style: italic
   #   - family: Trajan Pro

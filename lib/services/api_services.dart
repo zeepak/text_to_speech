@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:just_audio/just_audio.dart';
 import 'package:tts/utility%20functions/audio_player.dart';
@@ -6,8 +7,10 @@ import 'package:tts/utility%20functions/audio_player.dart';
 class TextToSpeechService {
   static Future<void> convertTextToSpeech({
     required String text,
+    required String selectedcodec,
     required String selectedLanguageCode,
     required String selectedVoiceCode,
+    required String selectedformat,
     required AudioPlayer player,
     required Function(Uint8List) onAudioAvailable,
     required Function(String) onError,
@@ -21,8 +24,8 @@ class TextToSpeechService {
       'src': text,
       'hl': selectedLanguageCode,
       'r': '1',
-      'c': 'mp3',
-      'f': '8khz_8bit_mono',
+      'c': selectedcodec,
+      'f': selectedformat,
       'v': selectedVoiceCode,
     };
 
@@ -37,6 +40,7 @@ class TextToSpeechService {
       final response = await http.get(url, headers: headers);
 
       if (response.statusCode == 200) {
+       
         final audioData = response.bodyBytes;
 
         onAudioAvailable(audioData);
@@ -46,7 +50,22 @@ class TextToSpeechService {
 
         // Set the audio source to the file path
         await player.setFilePath(file.path);
+        
+        Fluttertoast.showToast(
+            msg: 'Conversion Successful',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+          );
+          
+            
       } else {
+        Fluttertoast.showToast(
+            msg: 'Conversion Failed',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+          );
         onError('Failed to convert text to speech. Status Code: ${response.statusCode}');
       }
     } catch (error) {

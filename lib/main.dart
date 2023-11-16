@@ -2,6 +2,8 @@ import 'package:device_preview/device_preview.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:tts/Screens/home_screen.dart';
+import 'package:tts/Screens/text_screen.dart';
+import 'package:tts/constant/primary_theme.dart';
 
 
 
@@ -22,7 +24,10 @@ class MyApp extends StatelessWidget {
       locale: DevicePreview.locale(context),
       builder: DevicePreview.appBuilder,
       title: 'Text to Speech App',
-      home: const TextToSpeechApp(),
+      theme: ThemeData(
+          primarySwatch: Palette.kToDark,
+        ),
+      home: const TextScreen(),
     );
   }
 }

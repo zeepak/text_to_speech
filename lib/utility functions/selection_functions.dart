@@ -188,3 +188,41 @@ void showVoiceBottomSheet(BuildContext context, Function(String) onVoiceSelected
     },
   );
 }
+
+void showFormatBottomSheet(BuildContext context, Function(String) onFormatSelected) {
+  showModalBottomSheet(
+    context: context,
+    builder: (BuildContext context) {
+      return Column(
+        children: [
+          const ListTile(
+            title: Text('Select Format', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: supportedformat.length,
+              itemBuilder: (context, index) {
+                final format = supportedformat[index];
+                return ListTile(
+                  
+                  title: Text(
+                    format['name']!,
+                    style: TextStyle(
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
+                  onTap: 
+                       () {
+                          onFormatSelected(format['code']!); 
+                          Navigator.pop(context);
+                        }
+                      
+                );
+              },
+            ),
+          ),
+        ],
+      );
+    },
+  );
+}
