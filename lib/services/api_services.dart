@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
-import 'package:just_audio/just_audio.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:tts/utility%20functions/audio_player.dart';
 
 class TextToSpeechService {
@@ -10,6 +10,7 @@ class TextToSpeechService {
     required String selectedcodec,
     required String selectedLanguageCode,
     required String selectedVoiceCode,
+    required String selectedspeed,
     required String selectedformat,
     required AudioPlayer player,
     required Function(Uint8List) onAudioAvailable,
@@ -23,7 +24,7 @@ class TextToSpeechService {
       'key': apiKey,
       'src': text,
       'hl': selectedLanguageCode,
-      'r': '1',
+      'r': selectedspeed,
       'c': selectedcodec,
       'f': selectedformat,
       'v': selectedVoiceCode,
@@ -49,7 +50,7 @@ class TextToSpeechService {
         final file = await saveAudioToFile(audioData);
 
         // Set the audio source to the file path
-        await player.setFilePath(file.path);
+        await player.setSourceDeviceFile(file.path);
         
         Fluttertoast.showToast(
             msg: 'Conversion Successful',

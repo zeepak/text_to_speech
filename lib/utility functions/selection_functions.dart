@@ -2,17 +2,22 @@
 
 import 'package:country_flags/country_flags.dart';
 import 'package:flutter/material.dart';
+import 'package:tts/constant/color.dart';
 
 import '../Data/data.dart';
 
 void showLanguageBottomSheet(BuildContext context, Function(String) onLanguageSelected) {
   showModalBottomSheet(
+    backgroundColor: black_900,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+    ),
     context: context,
     builder: (BuildContext context) {
       return Column(
         children: [
-          const ListTile(
-            title: Text('Select Language', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+           ListTile(
+            title: Text('Select Language', style: TextStyle(fontFamily: 'SemiBold' ,fontSize: 18, color: white)),
           ),
           Expanded(
             child: ListView.builder(
@@ -22,7 +27,7 @@ void showLanguageBottomSheet(BuildContext context, Function(String) onLanguageSe
                 final languageCode = language['code']!;
                 return ListTile(
                   leading: _getLanguageIcon(languageCode),
-                  title: Text(language['name']!),
+                  title: Text(language['name']!, style: TextStyle(fontFamily: 'Regular', fontSize: 16, color: white),),
                   onTap: () {
                     onLanguageSelected(languageCode); // Callback to notify the selected language
                     Navigator.pop(context);
@@ -146,12 +151,16 @@ Widget? _getLanguageIcon(String languageCode) {
 
 void showVoiceBottomSheet(BuildContext context, Function(String) onVoiceSelected) {
   showModalBottomSheet(
+    backgroundColor: black_900,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+    ),
     context: context,
     builder: (BuildContext context) {
       return Column(
         children: [
-          const ListTile(
-            title: Text('Select Voice', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+           ListTile(
+            title: Text('Select Voice', style: TextStyle(fontFamily: 'SemiBold', fontSize: 18, color: white)),
           ),
           Expanded(
             child: ListView.builder(
@@ -170,7 +179,9 @@ void showVoiceBottomSheet(BuildContext context, Function(String) onVoiceSelected
                   title: Text(
                     voice['name']!,
                     style: TextStyle(
-                      fontWeight: isNormalFontWeight ? FontWeight.normal : FontWeight.bold,
+                      fontFamily: isNormalFontWeight? 'Regular' : 'Medium', 
+                      fontSize: isNormalFontWeight? 16 : 17,
+                      color: white
                     ),
                   ),
                   onTap: isNormalFontWeight
@@ -191,12 +202,16 @@ void showVoiceBottomSheet(BuildContext context, Function(String) onVoiceSelected
 
 void showFormatBottomSheet(BuildContext context, Function(String) onFormatSelected) {
   showModalBottomSheet(
+     backgroundColor: black_900,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+    ),
     context: context,
     builder: (BuildContext context) {
       return Column(
         children: [
-          const ListTile(
-            title: Text('Select Format', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+          ListTile(
+            title: Text('Select Format', style: TextStyle(fontFamily: 'SemiBold', fontSize: 18, color: white)),
           ),
           Expanded(
             child: ListView.builder(
@@ -204,11 +219,16 @@ void showFormatBottomSheet(BuildContext context, Function(String) onFormatSelect
               itemBuilder: (context, index) {
                 final format = supportedformat[index];
                 return ListTile(
-                  
-                  title: Text(
-                    format['name']!,
-                    style: TextStyle(
-                      fontWeight: FontWeight.normal,
+                  leading: Image.asset('assets/icons/format.png', height: 30, width: 30,),
+                  title: Padding(
+                    padding: const EdgeInsets.only(right: 5),
+                    child: Text(
+                      format['name']!,
+                      style: TextStyle(
+                        fontFamily: 'Regular',
+                        fontSize: 16,
+                        color: white,
+                      ),
                     ),
                   ),
                   onTap: 
