@@ -19,9 +19,11 @@ class Player extends StatefulWidget {
 }
 
 class _PlayerState extends State<Player> {
+void setStateIfMounted(f) {
+  if (mounted) setState(f);
+}
 
-
-  TextEditingController _controller = TextEditingController();
+  final TextEditingController _controller = TextEditingController();
   final audioPlayer = AudioPlayer();
   bool _isplaying = false;
   Duration duration = Duration.zero;
@@ -42,17 +44,17 @@ class _PlayerState extends State<Player> {
     
 
     audioPlayer.onPlayerStateChanged.listen((state) { 
-      setState(() {
+      setStateIfMounted(() {
         _isplaying = state == PlayerState.playing;
       });
     });
     audioPlayer.onDurationChanged.listen((newDuration) { 
-      setState(() {
+      setStateIfMounted(() {
         duration = newDuration;
       });
     });
     audioPlayer.onPositionChanged.listen((newPosition) { 
-      setState(() {
+      setStateIfMounted(() {
         position = newPosition;
       });
     });
@@ -85,114 +87,158 @@ void downloadAudio() async {
     String displayedname = widget.text.length > 10
         ? '${widget.text.substring(0, 10)}...'
         : widget.text;
-    return Scaffold(
-      backgroundColor: black,
-      appBar: AppBar(
+    return WillPopScope(
+      onWillPop: () async {
+      return await _onBackPressed(context);
+    },
+      child: Scaffold(
         backgroundColor: black,
-        elevation: 0.0,
-        actions: [
-          IconButton(
-            splashColor: black,
-            highlightColor: black,
-            onPressed: (){
-             
-              
-             
-            },
-             icon: Icon(Icons.restart_alt_rounded, color: white, size: 40,)
-             ),
-        ],
+        appBar: AppBar(
+          backgroundColor: black,
+          elevation: 0.0,
+          actions: [
+            IconButton(
+              splashColor: black,
+              highlightColor: black,
+              onPressed: (){
+                 showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius:
+      BorderRadius.circular(20),
       ),
-      body: Padding(
-        padding: const EdgeInsets.only(left: 20, right: 20),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(bottom: 30),
-              child: ClipRRect(
+      backgroundColor: black_900,
+      title: Text('Are you sure you want to exit?', style: TextStyle(fontFamily: 'Medium', color: white)),
+      actions: [
+        ElevatedButton(
+          style: ButtonStyle(
+            shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+              RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
-                child: Image.asset('assets/icons/player.gif',
-                width: 200,
-                height: 200,
-                fit: BoxFit.cover,
-                ),
               ),
             ),
-            const SizedBox(height: 15),
-            Text(displayedname, style: TextStyle(color: white, fontSize: 24, fontFamily: "Medium"),),
-            const SizedBox(height: 4),
-            Text('Text to Speech', style: TextStyle(color: black_500, fontSize: 15, fontFamily: "Regular"),),
-            Slider(
-              min: 0,
-              max: duration.inSeconds.toDouble(),
-              value: position.inSeconds.toDouble(),
-               onChanged: (value) async{
-                // final position = Duration(seconds: value.toInt());
-                // await audioPlayer.seek(position);
-                // await audioPlayer.resume();
-               }
+          ),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: Text('No', style: TextStyle(fontFamily: 'Medium', fontSize: 15, color: black)),
+        ),
+        ElevatedButton(
+          style: ButtonStyle(
+            shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+              RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+            ),
+          ),
+          onPressed: () {
+            Navigator.pushAndRemoveUntil(context, 
+            MaterialPageRoute(builder: (context) => const TextScreen()),
+             (route) => false);
+          },
+          child: Text('Yes', style: TextStyle(fontFamily: 'Medium', fontSize: 15, color: black)),
+        ),
+      ],
+        ),
+      );
+              },
+               icon: Icon(Icons.restart_alt_rounded, color: white, size: 40,)
                ),
-               Padding(
-                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                   Text(formatTime(position), style: TextStyle(color: black_500, fontSize: 12, fontFamily: 'Regular'),),
-                   Text(formatTime(duration - position), style: TextStyle(color: black_500, fontSize: 12, fontFamily: 'Regular'),)
-                  ],
-                 ),
-               ),
-               Padding(
-                 padding: const EdgeInsets.only(top: 30),
-                 
-                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                   children: [
-                    
-                     Expanded(
-                       child: Padding(
-                         padding: const EdgeInsets.only(left: 40),
-                         child: CircleAvatar(
-                           radius: 35,
-                           child: IconButton(
+          ],
+        ),
+        body: Padding(
+          padding: const EdgeInsets.only(left: 20, right: 20, top: 60),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 30),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: Image.asset('assets/icons/player.gif',
+                    width: 200,
+                    height: 200,
+                    fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 15),
+                Text(displayedname, style: TextStyle(color: white, fontSize: 24, fontFamily: "Medium"),),
+                const SizedBox(height: 4),
+                Text('Text to Speech', style: TextStyle(color: black_500, fontSize: 15, fontFamily: "Regular"),),
+                Slider(
+                  min: 0,
+                  max: duration.inSeconds.toDouble(),
+                  value: position.inSeconds.toDouble(),
+                   onChanged: (value){
+                    // final position = Duration(seconds: value.toInt());
+                    // await audioPlayer.seek(position);
+                    // await audioPlayer.resume();
+                   }
+                   ),
+                   Padding(
+                     padding: const EdgeInsets.symmetric(horizontal: 16),
+                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                       Text(formatTime(position), style: TextStyle(color: black_500, fontSize: 12, fontFamily: 'Regular'),),
+                       Text(formatTime(duration - position), style: TextStyle(color: black_500, fontSize: 12, fontFamily: 'Regular'),)
+                      ],
+                     ),
+                   ),
+                   Padding(
+                     padding: const EdgeInsets.only(top: 30),
+                     
+                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                       children: [
+                        
+                         Expanded(
+                           child: Padding(
+                             padding: const EdgeInsets.only(left: 40),
+                             child: CircleAvatar(
+                               radius: 35,
+                               child: IconButton(
+                                splashColor: black,
+                                highlightColor: black,
+                                 icon: Icon(
+                                  _isplaying ? Icons.pause : Icons.play_arrow,
+                                 ),
+                                 iconSize: 50,
+                                 color: white,
+                                 onPressed: ()async{
+                                  if(_isplaying){
+                                    await audioPlayer.pause();
+                                  }else{
+                                    
+                                   final file = await _saveAudioToFile(widget.audioData);
+                                   audioPlayer.setSourceDeviceFile(file.path);
+                                   audioPlayer.play(DeviceFileSource(file.path));
+                                  }
+                                 },
+                                 ),
+                                          
+                             ),
+                           ),
+                         ),
+                          IconButton(
                             splashColor: black,
                             highlightColor: black,
-                             icon: Icon(
-                              _isplaying ? Icons.pause : Icons.play_arrow,
-                             ),
-                             iconSize: 50,
-                             color: white,
-                             onPressed: ()async{
-                              if(_isplaying){
-                                await audioPlayer.pause();
-                              }else{
-                                
-                               final file = await _saveAudioToFile(widget.audioData);
-                               audioPlayer.setSourceDeviceFile(file.path);
-                               audioPlayer.play(DeviceFileSource(file.path));
-                              }
-                             },
-                             ),
-                                      
-                         ),
-                       ),
+                            onPressed: (){
+                            _showDialog(context);
+                          }, 
+                          icon: Icon(Icons.download_rounded, color: white, size: 30,)
+                          ),
+                       ],
                      ),
-                      IconButton(
-                        splashColor: black,
-                        highlightColor: black,
-                        onPressed: (){
-                        _showDialog(context);
-                      }, 
-                      icon: Icon(Icons.download_rounded, color: white, size: 30,)
-                      ),
-                   ],
-                 ),
-               ),
-      
-      
-           
-          ],
+                   ),
+                  
+                  
+               
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -204,6 +250,9 @@ void downloadAudio() async {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: 
+          BorderRadius.circular(20),
+          ),
           backgroundColor: black_900,
           title: Text('Enter file name', style: TextStyle(fontFamily: 'Medium', color: white),),
           content: TextFormField(
@@ -217,18 +266,13 @@ void downloadAudio() async {
           ),
           actions: [
             
-            ElevatedButton(
-              style:ButtonStyle(
-          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-        RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(20),
-      
-    )
-  )
-),
+            TextButton(
+             
               onPressed: () {
                 if(_controller.text.isEmpty){
                   Fluttertoast.showToast(
+            backgroundColor: black_900,
+            textColor: white,
             msg: 'Enter file name please',
             toastLength: Toast.LENGTH_SHORT,
             gravity: ToastGravity.BOTTOM,
@@ -239,12 +283,54 @@ void downloadAudio() async {
                 Navigator.of(context).pop();
                 }
               },
-              child: Text('Download',style: TextStyle(fontFamily: 'Medium', fontSize: 15, color: black),),
+              child: const Text('Download', style: TextStyle(fontSize: 17),),
             ),
           ],
         );
       },
     );
   }
-
+Future<bool> _onBackPressed(BuildContext context) async {
+  return await showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      backgroundColor: black_900,
+      title: Text('Are you sure you want to exit?', style: TextStyle(fontFamily: 'Medium', color: white)),
+      actions: [
+        ElevatedButton(
+          
+          style: ButtonStyle(
+            shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+              RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+            ),
+          ),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: Text('No', style: TextStyle(fontFamily: 'Medium', fontSize: 15, color: black)),
+        ),
+        ElevatedButton(
+          style: ButtonStyle(
+            shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+              RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+            ),
+          ),
+          onPressed: () {
+            Navigator.pushAndRemoveUntil(context, 
+            MaterialPageRoute(builder: (context) => const TextScreen()),
+             (route) => false);
+          },
+          child: Text('Yes', style: TextStyle(fontFamily: 'Medium', fontSize: 15, color: black)),
+        ),
+      ],
+    ),
+  ) ?? false;
+}
 }

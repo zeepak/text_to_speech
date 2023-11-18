@@ -9,7 +9,7 @@ import '../Data/data.dart';
 void showLanguageBottomSheet(BuildContext context, Function(String) onLanguageSelected) {
   showModalBottomSheet(
     backgroundColor: black_900,
-    shape: RoundedRectangleBorder(
+    shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
     ),
     context: context,
@@ -152,7 +152,7 @@ Widget? _getLanguageIcon(String languageCode) {
 void showVoiceBottomSheet(BuildContext context, Function(String) onVoiceSelected) {
   showModalBottomSheet(
     backgroundColor: black_900,
-    shape: RoundedRectangleBorder(
+    shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
     ),
     context: context,
@@ -168,7 +168,9 @@ void showVoiceBottomSheet(BuildContext context, Function(String) onVoiceSelected
               itemBuilder: (context, index) {
                 final voice = supportedvoice[index];
                 final isNormalFontWeight = voice['name']!.endsWith(')');
+                // ignore: no_leading_underscores_for_local_identifiers
                 final _ismale = voice['name']!.endsWith('(Male)');
+                // ignore: no_leading_underscores_for_local_identifiers
                 final _isfemale = voice['name']!.endsWith('(Female)');
                 return ListTile(
                   leading: _ismale
@@ -203,7 +205,7 @@ void showVoiceBottomSheet(BuildContext context, Function(String) onVoiceSelected
 void showFormatBottomSheet(BuildContext context, Function(String) onFormatSelected) {
   showModalBottomSheet(
      backgroundColor: black_900,
-    shape: RoundedRectangleBorder(
+    shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
     ),
     context: context,

@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:audioplayers/audioplayers.dart';
+import 'package:tts/constant/color.dart';
 import 'package:tts/utility%20functions/audio_player.dart';
 
 class TextToSpeechService {
@@ -53,6 +54,8 @@ class TextToSpeechService {
         await player.setSourceDeviceFile(file.path);
         
         Fluttertoast.showToast(
+            backgroundColor: black_900,
+            textColor: white,
             msg: 'Conversion Successful',
             toastLength: Toast.LENGTH_SHORT,
             gravity: ToastGravity.BOTTOM,
@@ -62,6 +65,8 @@ class TextToSpeechService {
             
       } else {
         Fluttertoast.showToast(
+          backgroundColor: black_900,
+            textColor: white,
             msg: 'Conversion Failed',
             toastLength: Toast.LENGTH_SHORT,
             gravity: ToastGravity.BOTTOM,

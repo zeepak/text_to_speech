@@ -1,7 +1,11 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:future_progress_dialog/future_progress_dialog.dart';
 import 'dart:typed_data';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:tts/Data/data.dart';
 import 'package:tts/Screens/player_screen.dart';
@@ -21,6 +25,66 @@ class TextToSpeechApp extends StatefulWidget {
 }
 
 class _TextToSpeechAppState extends State<TextToSpeechApp> {
+       bool isDeviceConnected = false;
+  late StreamSubscription<ConnectivityResult> connectivitySubscription;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Listen for connectivity changes
+    connectivitySubscription = Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
+      checkInternetConnection();
+    });
+
+    // Check internet connection when the app starts
+    checkInternetConnection();
+  }
+
+  Future<void> checkInternetConnection() async {
+    bool isConnected = await InternetConnectionChecker().hasConnection;
+
+    setState(() {
+      isDeviceConnected = isConnected;
+    });
+
+    if (!isConnected) {
+      // Show the dialog if not connected
+      showConnectDialog();
+    }
+  }
+
+  Future<void> showConnectDialog() async {
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: black_900,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20)
+          ),
+          title: Text('No Internet Connection', style: TextStyle(fontFamily: 'Medium', fontSize: 18, color: white),),
+          content: Text('Please connect to the internet.', style: TextStyle(fontFamily: 'Regular', fontSize: 16, color: white),),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Retry'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+                checkInternetConnection();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    connectivitySubscription.cancel();
+    super.dispose();
+  }
   Uint8List? audioData;
   final player = AudioPlayer();
   String selectedformat = '8khz_8bit_mono';
@@ -29,11 +93,13 @@ class _TextToSpeechAppState extends State<TextToSpeechApp> {
   String selectedcodec = 'mp3';
   String selectedspeed = '0';
   double _sliderValue = 0;
+  
   Future<void> convertTextToSpeech() async {
     try {
       showDialog(
       context: context,
       builder: (context) => FutureProgressDialog(
+        
     TextToSpeechService.convertTextToSpeech(
       selectedspeed: selectedspeed,
       text: widget.text,
@@ -55,6 +121,7 @@ class _TextToSpeechAppState extends State<TextToSpeechApp> {
         
       },
     ), 
+    
     message: Text('Converting text to speech...', style: TextStyle(fontFamily: 'Medium', fontSize: 15, color: white)),
     progress: CircularProgressIndicator(color: primary),
     decoration: BoxDecoration(
@@ -67,16 +134,17 @@ class _TextToSpeechAppState extends State<TextToSpeechApp> {
       Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => Player(audioData: audioData!, text: widget.text,)), (route) => false);
     });
       
+    // ignore: empty_catches
     }catch (e) {
-      print('Unexpected error: $e');
   }
   }
    Future<void> showProgress(BuildContext context) async {
+    // ignore: unused_local_variable
     var result = await showDialog(
       context: context,
       builder: (context) => FutureProgressDialog(
         convertTextToSpeech(),
-        message: Text('Converting text to speech...'),
+        message: const Text('Converting text to speech...'),
       ),
     );
 
@@ -109,6 +177,7 @@ class _TextToSpeechAppState extends State<TextToSpeechApp> {
   @override
   Widget build(BuildContext context) {
         String displayedText = widget.text.length > 10
+        // ignore: prefer_interpolation_to_compose_strings
         ? widget.text.substring(0, 10) + '...'
         : widget.text;
     return Scaffold(
@@ -328,11 +397,8 @@ class _TextToSpeechAppState extends State<TextToSpeechApp> {
                  child: InkWell(
                   splashColor: black,
                   highlightColor: black,
-                  onTap: (){
-                   
-              
-              convertTextToSpeech();
-            
+                  onTap: ()async{
+                    convertTextToSpeech();            
                   },
                    child: Container(
                           height: 51,

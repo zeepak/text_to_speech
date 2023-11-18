@@ -49,9 +49,11 @@ class _TextScreenState extends State<TextScreen> {
                          TextFormField(
                           
                             onChanged: (text) {
-                                 setState(() {
+                                 if(mounted){
+                                  setState(() {
                                    _currentLength = text.length;
                                  });
+                                 }
                                },
                              controller: _textEditingController,
                              
@@ -118,7 +120,8 @@ class _TextScreenState extends State<TextScreen> {
                    child: InkWell(
                     splashColor: black,
                     highlightColor: black,
-                    onTap: (){
+                    onTap: ()async{
+                      
                       if (_formKey.currentState!.validate()) {
                       String text = _textEditingController.text;
                     Navigator.push(
@@ -152,11 +155,12 @@ class _TextScreenState extends State<TextScreen> {
     DateTime now = DateTime.now();
 
     if (currentBackPressTime == null ||
-        now.difference(currentBackPressTime!) > Duration(seconds: 2)) {
+        now.difference(currentBackPressTime!) > const Duration(seconds: 2)) {
       currentBackPressTime = now;
       Fluttertoast.showToast(
+        
         msg: 'Double press back to close',
-        backgroundColor: Colors.black,
+        backgroundColor: black_900,
         textColor: Colors.white,
       );
       return false;

@@ -1,17 +1,11 @@
-import 'package:device_preview/device_preview.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:tts/Screens/home_screen.dart';
 import 'package:tts/Screens/text_screen.dart';
 import 'package:tts/constant/primary_theme.dart';
 
 
 
 void main() => runApp(
-    DevicePreview(
-    enabled: !kReleaseMode,
-    builder: (context) => const MyApp(), // Wrap your app
-  ),
+    const MyApp(),
   );
 
 class MyApp extends StatelessWidget {
@@ -21,9 +15,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return  MaterialApp(
       debugShowCheckedModeBanner: false,
-      useInheritedMediaQuery: true,
-      locale: DevicePreview.locale(context),
-      builder: DevicePreview.appBuilder,
+      // useInheritedMediaQuery: true,
+      // locale: DevicePreview.locale(context),
+      // builder: DevicePreview.appBuilder,
       title: 'Text to Speech App',
       theme: ThemeData(
           primarySwatch: Palette.kToDark,
