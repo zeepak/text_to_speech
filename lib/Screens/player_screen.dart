@@ -171,10 +171,18 @@ void downloadAudio() async {
                   min: 0,
                   max: duration.inSeconds.toDouble(),
                   value: position.inSeconds.toDouble(),
-                   onChanged: (value){
-                    // final position = Duration(seconds: value.toInt());
-                    // await audioPlayer.seek(position);
-                    // await audioPlayer.resume();
+                   onChanged: (value) async{
+                    final newPosition = Duration(seconds: value.toInt());
+  if (newPosition <= duration) {
+    await audioPlayer.seek(newPosition);
+    await audioPlayer.resume();
+  } else {
+    // Handle the case where the value exceeds the maximum duration.
+    // You can choose to ignore it or take appropriate action.
+     setState(() {
+      position = duration;
+    });
+  }
                    }
                    ),
                    Padding(

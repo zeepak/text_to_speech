@@ -49,16 +49,16 @@ class _TextScreenState extends State<TextScreen> {
                          TextFormField(
                           
                             onChanged: (text) {
-                                 if(mounted){
+                                 
                                   setState(() {
                                    _currentLength = text.length;
                                  });
-                                 }
+                                 
                                },
                              controller: _textEditingController,
                              
                              maxLines: null, // Allow unlimited lines
-                             maxLength: 900, // Set the maximum character limit
+                             maxLength: 1000, // Set the maximum character limit
                              validator: (value){
                               if (value!.isEmpty) {
                               return ("Please enter text");
@@ -75,8 +75,11 @@ class _TextScreenState extends State<TextScreen> {
                                filled: true,
                                
                                fillColor: black_900,
-                               hintText: 'Enter your text',
-                               hintStyle: TextStyle(color: black_500,fontFamily: 'Regular', fontSize: 16),
+                               hintText: 'Your Text',
+                               hintStyle: TextStyle(color: black_300,fontFamily: 'Regular', fontSize: 16),
+                               labelText: 'Your Text',
+                    labelStyle: TextStyle(fontFamily: 'Regular', color: black_300, fontSize: 16),
+                    floatingLabelStyle: TextStyle(fontFamily: 'Regular', color: primary, fontSize: 12),
                                border: OutlineInputBorder(
                                  borderSide: BorderSide(color: black_900),
                                  borderRadius: BorderRadius.circular(10.0),
@@ -106,7 +109,7 @@ class _TextScreenState extends State<TextScreen> {
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
-                    '$_currentLength/900',
+                    '$_currentLength/1000',
                     style: TextStyle(color: black_500, fontFamily: "Regular", fontSize: 10),
                   ),
                 ),

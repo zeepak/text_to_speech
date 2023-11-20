@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "653613258024",
+    "project_id": "ttspeech-5d060",
+    "storage_bucket": "ttspeech-5d060.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:653613258024:android:206a1ba55ca05db57cec1d",
+        "android_client_info": {
+          "package_name": "com.picodev.ttspeech"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBUZBtiii2wth-MxRp23Lw-U8Apa01otCg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
