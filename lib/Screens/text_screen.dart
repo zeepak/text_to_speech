@@ -1,20 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:tts/Screens/home_screen.dart';
 import 'package:tts/constant/color.dart';
 
 class TextScreen extends StatefulWidget {
-  const TextScreen({super.key});
+ 
+  const TextScreen({super.key, });
 
   @override
   State<TextScreen> createState() => _TextScreenState();
 }
 
 class _TextScreenState extends State<TextScreen> {
+
   final TextEditingController _textEditingController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   int _currentLength = 0;
   DateTime? currentBackPressTime;
+  
+
   @override
   Widget build(BuildContext context) {
     double containerHeight = MediaQuery.of(context).size.height * 0.4;
@@ -22,6 +27,18 @@ class _TextScreenState extends State<TextScreen> {
       onWillPop: _onWillPop,
       child: Scaffold(
         backgroundColor: black,
+        appBar: AppBar(
+        backgroundColor: black,
+        elevation: 0.0,
+        leading: IconButton(
+          onPressed: (){
+         final zoomdrawer = ZoomDrawer.of(context);
+         zoomdrawer?.open();
+          },
+          icon: Icon(Icons.menu, color: white,),
+        )
+      ),
+
         body: Form(
           key: _formKey,
           child: SingleChildScrollView(
@@ -77,9 +94,7 @@ class _TextScreenState extends State<TextScreen> {
                                fillColor: black_900,
                                hintText: 'Your Text',
                                hintStyle: TextStyle(color: black_300,fontFamily: 'Regular', fontSize: 16),
-                               labelText: 'Your Text',
-                    labelStyle: TextStyle(fontFamily: 'Regular', color: black_300, fontSize: 16),
-                    floatingLabelStyle: TextStyle(fontFamily: 'Regular', color: primary, fontSize: 12),
+                               
                                border: OutlineInputBorder(
                                  borderSide: BorderSide(color: black_900),
                                  borderRadius: BorderRadius.circular(10.0),

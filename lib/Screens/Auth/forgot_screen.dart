@@ -1,4 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:tts/constant/color.dart';
 
 class Forgot extends StatefulWidget {
@@ -11,7 +13,8 @@ class Forgot extends StatefulWidget {
 class _ForgotState extends State<Forgot> {
   TextEditingController emailController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-
+  bool loading = false;
+String? errorMessage;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -115,9 +118,7 @@ class _ForgotState extends State<Forgot> {
                   padding: const EdgeInsets.only(left: 70, right: 70),
                   child: InkWell(
                     onTap: () {
-                      if (_formKey.currentState!.validate()) {
-                        // Implement submit logic
-                      }
+                      verifyEmail();
                     },
                     child: Container(
                       height: 51,
@@ -127,7 +128,10 @@ class _ForgotState extends State<Forgot> {
                         borderRadius: BorderRadius.circular(27),
                       ),
                       child: Center(
-                        child: Text(
+                        child: loading? CircularProgressIndicator(
+                          color: black,
+                        ):
+                        Text(
                           'Submit',
                           style: TextStyle(fontFamily: 'SemiBold', fontSize: 18, color: black),
                         ),
@@ -143,5 +147,46 @@ class _ForgotState extends State<Forgot> {
         ),
       ),
     );
+  }
+  Future verifyEmail() async{
+    if (_formKey.currentState!.validate()) {
+
+    try{
+       setState(() {
+        loading = true;
+      });
+      
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: emailController.text.trim());
+       setState(() {
+        loading = false;
+      });
+      
+    Fluttertoast.showToast(
+        backgroundColor: black_900,
+            textColor: white,
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+      msg: 'Password Reset Email Sent'
+      );
+     
+      
+    } on FirebaseAuthException catch (e){
+       setState(() {
+        loading = false;
+      });
+      
+      // ignore: avoid_print
+      print(e);
+      Fluttertoast.showToast(
+        backgroundColor: black_900,
+            textColor: white,
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+        msg: e.toString()
+        );
+    }
+    }
   }
 }

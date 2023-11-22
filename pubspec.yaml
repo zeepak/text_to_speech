@@ -42,11 +42,16 @@ dependencies:
   country_flags: ^2.1.0
   fluttertoast: ^8.2.4
   future_progress_dialog: ^0.2.1
+  flutter_zoom_drawer: ^3.1.1
   device_preview: ^1.1.0
   path_provider: ^2.1.1
   flutter_audio_waveforms: ^1.2.1+8
   internet_connection_checker: ^1.0.0+1
+  url_launcher: ^6.2.1
   firebase_core: ^2.22.0
+  cloud_firestore: ^4.13.1
+  firebase_auth: ^4.14.0
+ 
 
 dev_dependencies:
   flutter_test:

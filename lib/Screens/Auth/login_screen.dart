@@ -1,5 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:tts/Drawer/drawer_screen.dart';
 import 'package:tts/Screens/Auth/signup_screen.dart';
+import 'package:tts/Screens/text_screen.dart';
 import 'package:tts/constant/color.dart';
 
 import 'forgot_screen.dart';
@@ -16,7 +21,10 @@ class _LoginState extends State<Login> {
   TextEditingController passwordcontroller = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _showPassword = false;
-
+  final _auth = FirebaseAuth.instance;
+bool loading = false;
+  String? errorMessage;
+  User? users;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,7 +36,7 @@ class _LoginState extends State<Login> {
             key: _formKey,
             child: Column(
               children: [
-                const SizedBox(height: 100), // Add space for image or any other widgets
+                const SizedBox(height: 50), // Add space for image or any other widgets
 
                 Image.asset(
                   'assets/icons/signIn.png',
@@ -191,9 +199,7 @@ class _LoginState extends State<Login> {
                     splashColor: black,
                     highlightColor: black,
                     onTap: () {
-                      if (_formKey.currentState!.validate()) {
-                        // Implement sign in logic
-                      }
+                     signIn(emailcontroller.text, passwordcontroller.text);
                     },
                     child: Container(
                       height: 51,
@@ -203,7 +209,10 @@ class _LoginState extends State<Login> {
                         borderRadius: BorderRadius.circular(27),
                       ),
                       child: Center(
-                        child: Text(
+                        child: loading? CircularProgressIndicator(
+                          color: black,
+                        ):
+                        Text(
                           'sign In',
                           style: TextStyle(fontFamily: 'SemiBold', fontSize: 18, color: black),
                         ),
@@ -247,4 +256,72 @@ class _LoginState extends State<Login> {
       ),
     );
   }
+ void signIn(String email, String password) async {
+  if (_formKey.currentState!.validate()) {
+    try {
+      setState(() {
+        loading = true;
+      });
+
+      await _auth.signInWithEmailAndPassword(email: email, password: password);
+
+      setState(() {
+        loading = false;
+      });
+
+      Fluttertoast.showToast(
+        backgroundColor: black_900,
+        textColor: white,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        msg: "Login Successful",
+      );
+
+      Navigator.pushAndRemoveUntil(
+        (context),
+        MaterialPageRoute(builder: (context) => DrawerScreen()),
+        (route) => false,
+      );
+    } on FirebaseAuthException catch (error) {
+      setState(() {
+        loading = false;
+      });
+
+      String errorMessage;
+
+      switch (error.code) {
+        case "user-not-found":
+          errorMessage = "User with this email doesn't exist.";
+          break;
+        case "invalid-email":
+          errorMessage = "Your email address appears to be malformed.";
+          break;
+        case "wrong-password":
+          errorMessage = "Your password is incorrect.";
+          break;
+        case "user-disabled":
+          errorMessage = "User with this email has been disabled.";
+          break;
+        case "too-many-requests":
+          errorMessage = "Too many login attempts. Please try again later.";
+          break;
+        case "operation-not-allowed":
+          errorMessage = "Signing in with Email and Password is not enabled.";
+          break;
+        default:
+          errorMessage = "An undefined error occurred.";
+      }
+
+      Fluttertoast.showToast(
+        backgroundColor: black_900,
+        textColor: white,
+        toastLength: Toast.LENGTH_LONG, // Use LONG for error messages
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        msg: errorMessage,
+      );
+    }
+  }
+ }
 }

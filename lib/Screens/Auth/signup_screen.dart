@@ -1,5 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:tts/Screens/Auth/login_screen.dart';
 import 'package:tts/constant/color.dart';
+
+import '../../Models/auth_model.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({super.key});
@@ -15,6 +21,9 @@ class _SignUpState extends State<SignUp> {
   TextEditingController fullnameController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _showPassword = false;
+  bool loading = false;
+  final _auth = FirebaseAuth.instance;
+  String? errorMessage;
 
   @override
   Widget build(BuildContext context) {
@@ -269,9 +278,7 @@ class _SignUpState extends State<SignUp> {
                   padding: const EdgeInsets.only(left: 70, right: 70),
                   child: InkWell(
                     onTap: () {
-                      if (_formKey.currentState!.validate()) {
-                        // Implement sign up logic
-                      }
+                     signUp(emailController.text, passwordController.text);
                     },
                     child: Container(
                       height: 51,
@@ -281,7 +288,11 @@ class _SignUpState extends State<SignUp> {
                         borderRadius: BorderRadius.circular(27),
                       ),
                       child: Center(
-                        child: Text(
+                        child: loading? CircularProgressIndicator(
+                          color: black,
+                          
+                        ):
+                        Text(
                           'Sign Up',
                           style: TextStyle(fontFamily: 'SemiBold', fontSize: 18, color: black),
                         ),
@@ -324,5 +335,100 @@ class _SignUpState extends State<SignUp> {
         ),
       ),
     );
+  }
+  void signUp(String email, String password) async {
+    if (_formKey.currentState!.validate()) {
+      try {
+      setState(() {
+        loading = true;
+      });
+      
+      
+        await _auth
+            .createUserWithEmailAndPassword(email: email, password: password)
+            .then((value) => {postDetailsToFirestore()})
+            // ignore: body_might_complete_normally_catch_error
+            .catchError((e) {
+          Fluttertoast.showToast(
+            backgroundColor: black_900,
+            textColor: white,
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            msg: e!.message
+            );
+        });
+      } on FirebaseAuthException catch (error) {
+         setState(() {
+          loading = false;
+        });
+        switch (error.code) {
+          case "invalid-email":
+            errorMessage = "Your email address appears to be malformed.";
+            break;
+          case "wrong-password":
+            errorMessage = "Your password is wrong.";
+            break;
+          case "user-not-found":
+            errorMessage = "User with this email doesn't exist.";
+            break;
+          case "user-disabled":
+            errorMessage = "User with this email has been disabled.";
+            break;
+          case "too-many-requests":
+            errorMessage = "Too many requests";
+            break;
+          case "operation-not-allowed":
+            errorMessage = "Signing in with Email and Password is not enabled.";
+            break;
+          default:
+            errorMessage = "An undefined Error happened.";
+        }
+        Fluttertoast.showToast(
+          backgroundColor: black_900,
+            textColor: white,
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+          msg: errorMessage!
+          );
+      }
+    }
+  }
+
+  postDetailsToFirestore() async {
+    FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
+    User? user = _auth.currentUser;
+
+    UserModel userModel = UserModel();
+
+    // writing all the values
+    userModel.email = user!.email;
+    userModel.uid = user.uid;
+    userModel.fullName = fullnameController.text;
+   
+    
+    await firebaseFirestore
+        .collection("UsersDetails")
+        .doc(user.uid)
+        .set(userModel.toMap());
+       Fluttertoast.showToast(
+        backgroundColor: black_900,
+            textColor: white,
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+        msg: "Create Successfully"
+        );
+        await _auth.signOut();
+      // ignore: use_build_context_synchronously
+      Navigator.pushAndRemoveUntil(
+          (context),
+          MaterialPageRoute(builder: (context) => const Login()),
+              (route) => false);
+      setState(() {
+
+      });
+
   }
 }

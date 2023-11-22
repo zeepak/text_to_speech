@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:tts/Screens/text_screen.dart';
+import 'package:tts/Drawer/drawer_screen.dart';
 import 'package:tts/constant/color.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:tts/utility%20functions/file_download.dart';
@@ -133,7 +133,7 @@ void downloadAudio() async {
           ),
           onPressed: () {
             Navigator.pushAndRemoveUntil(context, 
-            MaterialPageRoute(builder: (context) => const TextScreen()),
+            MaterialPageRoute(builder: (context) => DrawerScreen()),
              (route) => false);
           },
           child: Text('Yes', style: TextStyle(fontFamily: 'Medium', fontSize: 15, color: black)),
@@ -332,7 +332,7 @@ Future<bool> _onBackPressed(BuildContext context) async {
           ),
           onPressed: () {
             Navigator.pushAndRemoveUntil(context, 
-            MaterialPageRoute(builder: (context) => const TextScreen()),
+            MaterialPageRoute(builder: (context) => DrawerScreen()),
              (route) => false);
           },
           child: Text('Yes', style: TextStyle(fontFamily: 'Medium', fontSize: 15, color: black)),
