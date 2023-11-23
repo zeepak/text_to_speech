@@ -25,7 +25,7 @@ class Splash extends StatefulWidget {
             if(FirebaseAuth.instance.currentUser != null){
     Navigator.pushAndRemoveUntil(
                       (context),
-                      MaterialPageRoute(builder: (context) => DrawerScreen()),
+                      MaterialPageRoute(builder: (context) => const DrawerScreen()),
                       (route) => false);
    }else{
     Navigator.pushAndRemoveUntil(
@@ -45,7 +45,7 @@ class Splash extends StatefulWidget {
       backgroundColor: black,
       body: 
       Center(
-        child: Image.asset('assets/icons/player.gif', height: 200, width: 200,),
+        child: Image.asset('assets/icons/logo.png', height: 140, width: 140,),
       ),
      
     );

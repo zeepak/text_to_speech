@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:future_progress_dialog/future_progress_dialog.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'dart:typed_data';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -27,11 +28,13 @@ class TextToSpeechApp extends StatefulWidget {
 class _TextToSpeechAppState extends State<TextToSpeechApp> {
        bool isDeviceConnected = false;
   late StreamSubscription<ConnectivityResult> connectivitySubscription;
-
+  RewardedAd? _rewardedAd; 
   @override
   void initState() {
     super.initState();
-
+    _createRewardedAd();
+    initBannerAd();
+    
     // Listen for connectivity changes
     connectivitySubscription = Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
       checkInternetConnection();
@@ -173,6 +176,72 @@ class _TextToSpeechAppState extends State<TextToSpeechApp> {
       });
     });
   } 
+   
+late BannerAd bannerAd;
+bool isAdLoaded = false;
+var adUnit = 'ca-app-pub-3940256099942544/6300978111';
+
+initBannerAd(){
+  bannerAd = BannerAd(
+    size: AdSize.banner,
+     adUnitId: adUnit,
+      listener: BannerAdListener(
+        onAdLoaded: (ad){
+          setState(() {
+            isAdLoaded = true;
+          });
+        },
+        onAdFailedToLoad: (ad, error){
+          ad.dispose();
+          // ignore: avoid_print
+          print(error);
+        }
+      ),
+       request: const AdRequest()
+       );
+       bannerAd.load();
+}
+_createRewardedAd(){
+  RewardedAd.load(
+    adUnitId: 'ca-app-pub-3940256099942544/5224354917',
+     request: const AdRequest(),
+      rewardedAdLoadCallback: RewardedAdLoadCallback(
+        onAdLoaded: (ad){
+          setState(() {
+            _rewardedAd = ad;
+          });
+        },
+         onAdFailedToLoad: (error){
+          setState(() {
+            _rewardedAd = null;
+          });
+         }
+         ),
+      );
+}
+_showRewardedAd() {
+  if (_rewardedAd != null && isAdLoaded) {
+    _rewardedAd!.fullScreenContentCallback = FullScreenContentCallback(
+      onAdDismissedFullScreenContent: (ad) {
+        ad.dispose();
+        _createRewardedAd();
+      },
+      onAdFailedToShowFullScreenContent: (ad, error) {
+        ad.dispose();
+        _createRewardedAd();
+      },
+    );
+    _rewardedAd!.show(
+      onUserEarnedReward: (ad, reward) {
+        convertTextToSpeech();
+      },
+    );
+    _rewardedAd = null;
+  } else{
+    convertTextToSpeech();
+  }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -191,7 +260,7 @@ class _TextToSpeechAppState extends State<TextToSpeechApp> {
            ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.only(left: 20, right: 20),
         child: SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -208,7 +277,7 @@ class _TextToSpeechAppState extends State<TextToSpeechApp> {
                   Navigator.pop(context);
                 },
                 child: Container(
-                  height: 80,
+                  height: 60,
                   width: double.infinity,
                   decoration: BoxDecoration(
                     color: black_900,
@@ -393,12 +462,12 @@ class _TextToSpeechAppState extends State<TextToSpeechApp> {
                     ),
                   ),
                 Padding(
-                 padding: const EdgeInsets.only(left: 70, right: 70, top: 30),
+                 padding: const EdgeInsets.only(left: 70, right: 70, top: 10),
                  child: InkWell(
                   splashColor: black,
                   highlightColor: black,
                   onTap: ()async{
-                    convertTextToSpeech();            
+                    _showRewardedAd();           
                   },
                    child: Container(
                           height: 51,
@@ -417,6 +486,11 @@ class _TextToSpeechAppState extends State<TextToSpeechApp> {
           ),
         ),
       ),
+      bottomNavigationBar: isAdLoaded? SizedBox(
+        height: bannerAd.size.height.toDouble(),
+        width: bannerAd.size.width.toDouble(),
+        child: AdWidget(ad: bannerAd),
+      ) : const SizedBox(),
     );
   }
   

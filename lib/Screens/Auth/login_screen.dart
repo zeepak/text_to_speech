@@ -1,10 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:tts/Drawer/drawer_screen.dart';
 import 'package:tts/Screens/Auth/signup_screen.dart';
-import 'package:tts/Screens/text_screen.dart';
 import 'package:tts/constant/color.dart';
 
 import 'forgot_screen.dart';
@@ -278,9 +276,10 @@ bool loading = false;
         msg: "Login Successful",
       );
 
+      // ignore: use_build_context_synchronously
       Navigator.pushAndRemoveUntil(
         (context),
-        MaterialPageRoute(builder: (context) => DrawerScreen()),
+        MaterialPageRoute(builder: (context) => const DrawerScreen()),
         (route) => false,
       );
     } on FirebaseAuthException catch (error) {

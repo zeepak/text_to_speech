@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:tts/Screens/Auth/login_screen.dart';
 import 'package:tts/constant/color.dart';
-import 'package:url_launcher/link.dart';
 import 'package:url_launcher/url_launcher.dart';
 class MenuScreen extends StatefulWidget {
   const MenuScreen({Key? key}) : super(key: key);
@@ -330,6 +329,7 @@ Future<void> _showDeleteAccountDialog(BuildContext context) async {
           msg: 'Account Deleted Successfully',
         );
 
+        // ignore: use_build_context_synchronously
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => const Login()),
@@ -338,6 +338,7 @@ Future<void> _showDeleteAccountDialog(BuildContext context) async {
       }
     } catch (e) {
       // Handle errors
+      // ignore: avoid_print
       print('Error deleting account: $e');
     }
   }

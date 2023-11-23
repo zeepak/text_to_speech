@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:tts/Drawer/drawer_screen.dart';
 import 'package:tts/constant/color.dart';
@@ -37,10 +38,12 @@ void setStateIfMounted(f) {
 
     return file;
   }
+  RewardedAd? _rewardedAd; 
   @override
   void initState() {
     super.initState();
-    
+    initBannerAd();
+    _createRewardedAd();
     
 
     audioPlayer.onPlayerStateChanged.listen((state) { 
@@ -81,6 +84,69 @@ void downloadAudio() async {
     await FileOperations.downloadAudio(_controller.text,widget.audioData, context);
   }
 
+
+late BannerAd bannerAd;
+bool isAdLoaded = false;
+var adUnit = 'ca-app-pub-3940256099942544/6300978111';
+
+initBannerAd(){
+  bannerAd = BannerAd(
+    size: AdSize.banner,
+     adUnitId: adUnit,
+      listener: BannerAdListener(
+        onAdLoaded: (ad){
+          setState(() {
+            isAdLoaded = true;
+          });
+        },
+        onAdFailedToLoad: (ad, error){
+          ad.dispose();
+          // ignore: avoid_print
+          print(error);
+        }
+      ),
+       request: const AdRequest()
+       );
+       bannerAd.load();
+}
+_createRewardedAd(){
+  RewardedAd.load(
+    adUnitId: 'ca-app-pub-3940256099942544/5224354917',
+     request: const AdRequest(),
+      rewardedAdLoadCallback: RewardedAdLoadCallback(
+        onAdLoaded: (ad){
+          setState(() {
+            _rewardedAd = ad;
+          });
+        },
+         onAdFailedToLoad: (error){
+          setState(() {
+            _rewardedAd = null;
+          });
+         }
+         ),
+      );
+}
+_showRewardedAd() {
+  if (_rewardedAd != null && isAdLoaded) {
+    _rewardedAd!.fullScreenContentCallback = FullScreenContentCallback(
+      onAdDismissedFullScreenContent: (ad) {
+        ad.dispose();
+        _createRewardedAd();
+      },
+      onAdFailedToShowFullScreenContent: (ad, error) {
+        ad.dispose();
+        _createRewardedAd();
+      },
+    );
+    _rewardedAd!.show(
+      onUserEarnedReward: (ad, reward) {
+        downloadAudio();
+      },
+    );
+    _rewardedAd = null;
+  } 
+}
 
   @override
   Widget build(BuildContext context) {
@@ -133,7 +199,7 @@ void downloadAudio() async {
           ),
           onPressed: () {
             Navigator.pushAndRemoveUntil(context, 
-            MaterialPageRoute(builder: (context) => DrawerScreen()),
+            MaterialPageRoute(builder: (context) => const DrawerScreen()),
              (route) => false);
           },
           child: Text('Yes', style: TextStyle(fontFamily: 'Medium', fontSize: 15, color: black)),
@@ -248,6 +314,11 @@ void downloadAudio() async {
             ),
           ),
         ),
+        bottomNavigationBar: isAdLoaded? SizedBox(
+        height: bannerAd.size.height.toDouble(),
+        width: bannerAd.size.width.toDouble(),
+        child: AdWidget(ad: bannerAd),
+      ) : const SizedBox(),
       ),
     );
   }
@@ -287,7 +358,7 @@ void downloadAudio() async {
             timeInSecForIosWeb: 1,
           );
                 }else{
-                  downloadAudio();
+                  _showRewardedAd();
                 Navigator.of(context).pop();
                 }
               },
@@ -332,7 +403,7 @@ Future<bool> _onBackPressed(BuildContext context) async {
           ),
           onPressed: () {
             Navigator.pushAndRemoveUntil(context, 
-            MaterialPageRoute(builder: (context) => DrawerScreen()),
+            MaterialPageRoute(builder: (context) => const DrawerScreen()),
              (route) => false);
           },
           child: Text('Yes', style: TextStyle(fontFamily: 'Medium', fontSize: 15, color: black)),
