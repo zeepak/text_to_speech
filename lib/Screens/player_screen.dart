@@ -10,10 +10,10 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:tts/utility%20functions/file_download.dart';
 
 class Player extends StatefulWidget {
-  
+  final String selectedcodec;
   final Uint8List audioData;
   final String text;
-  const Player({Key? key, required this.audioData, required this.text}) : super(key: key);
+  const Player({Key? key, required this.audioData, required this.text, required this.selectedcodec}) : super(key: key);
 
   @override
   State<Player> createState() => _PlayerState();
@@ -81,7 +81,7 @@ void setStateIfMounted(f) {
 
   }
 void downloadAudio() async {
-    await FileOperations.downloadAudio(_controller.text,widget.audioData, context);
+    await FileOperations.downloadAudio(widget.selectedcodec ,_controller.text,widget.audioData, context);
   }
 
 

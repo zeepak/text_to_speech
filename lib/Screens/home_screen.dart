@@ -134,7 +134,7 @@ class _TextToSpeechAppState extends State<TextToSpeechApp> {
     ),
       ).then((_) {
       // Navigate to Player screen after conversion
-      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => Player(audioData: audioData!, text: widget.text,)), (route) => false);
+      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => Player(audioData: audioData!, text: widget.text, selectedcodec: selectedcodec,)), (route) => false);
     });
       
     // ignore: empty_catches

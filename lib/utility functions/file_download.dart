@@ -8,10 +8,10 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:tts/constant/color.dart';
 
 class FileOperations {
-  static Future<void> downloadAudio(String filename,Uint8List audioData, BuildContext context) async {
+  static Future<void> downloadAudio(String _selectedcodec ,String filename,Uint8List audioData, BuildContext context) async {
     try {
       final directory = await DownloadsPathProvider.downloadsDirectory;
-      final filePath = '${directory?.path}/$filename.mp3';
+      final filePath = '${directory?.path}/$filename.$_selectedcodec';
 
       final file = File(filePath);
       await file.writeAsBytes(audioData);
